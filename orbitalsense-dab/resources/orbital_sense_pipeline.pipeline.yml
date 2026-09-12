@@ -1,0 +1,25 @@
+resources:
+  pipelines:
+    orbital_sense_pipeline:
+      name: "OrbitalSense Streaming Pipeline"
+      catalog: ${var.catalog}
+      target: ${var.schema}
+
+      libraries:
+        - glob:
+            include: ../src/orbital_sense_pipeline/transformations/**
+
+      root_path: ../src/orbital_sense_pipeline
+
+      serverless: true
+      continuous: false
+      development: true
+      photon: true
+      channel: current
+
+      configuration:
+        volume_path: "/Volumes/${var.catalog}/${var.schema}/raw_telemetry_vol"
+
+      permissions:
+        - level: CAN_VIEW
+          group_name: "users"

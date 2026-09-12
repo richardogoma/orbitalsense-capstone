@@ -1,0 +1,7 @@
+resources:
+  volumes:
+    raw_telemetry_vol:
+      catalog_name: ${var.catalog}
+      schema_name: ${var.schema}
+      name: "raw_telemetry_vol"
+      volume_type: "MANAGED"
