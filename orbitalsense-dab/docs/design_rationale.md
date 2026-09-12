@@ -172,5 +172,56 @@ for gs, records in group_by_ground_station(all_records).items():
 3. **Add `satellite_id` partitioning** to Silver/Gold tables for
    partition pruning on satellite-specific queries.
 4. **Move to continuous pipeline mode** via the backing job schedule
-   pattern (already supported in the DAB configuration) for sub-second
-   latency requirements.
+   pattern (**already implemented** as `orbital_sense_pipeline_schedule`
+   with `continuous.pause_status: UNPAUSED` and `performance_target:
+   PERFORMANCE_OPTIMIZED`) for sub-second latency requirements.
+
+---
+
+## 5. Operational Design Decisions
+
+### Decoupled Simulator and Pipeline
+
+The simulator job and pipeline are **intentionally separate resources**
+with independent lifecycles rather than tasks within a single
+orchestration job. This was a deliberate refactoring choice:
+
+- The simulator is a pure-Python script (no Spark) running on serverless
+  compute. It writes JSON-lines files to a UC Volume.
+- The pipeline runs continuously via a backing schedule job, processing
+  files as they arrive via Auto Loader.
+- Coupling them in a sequential task chain would block the streaming
+  pipeline while the simulator generates all batches, defeating the
+  purpose of a streaming architecture.
+
+### UC-Compatible Source File Lineage
+
+The Bronze layer uses `_metadata.file_path` instead of `input_file_name()`
+for capturing source file lineage. The `input_file_name()` function is
+not supported in Unity Catalog (`UC_COMMAND_NOT_SUPPORTED`). The
+`_metadata.file_path` column is the UC-recommended alternative and is
+automatically populated by Auto Loader.
+
+### Dashboard as Code
+
+The analytics dashboard is managed as a DAB resource with its full
+configuration serialized in `src/dashboards/orbital_sense_analytics.lvdash.json`.
+Key design choices:
+
+- **`dataset_catalog` / `dataset_schema`** parameters allow the same
+  dashboard definition to target different catalogs per environment
+  (dev vs prod) without editing SQL queries.
+- **`warehouse_id`** is parameterized via a bundle variable, making the
+  SQL warehouse configurable per target.
+- **Semantic color mappings** (NOMINAL=green, WARNING=amber, CRITICAL=red)
+  are embedded in the theme so health status visualizations are consistent
+  across all pages without per-widget configuration.
+
+### Failure Notifications
+
+The continuous pipeline schedule is configured with email notifications
+on failure to `richard.ogoma@outlook.com`. This provides immediate
+alerting without requiring a separate monitoring stack. The
+`no_alert_for_skipped_runs` flag suppresses noise from skipped runs,
+which are common with continuous schedules when a pipeline update is
+already in progress.

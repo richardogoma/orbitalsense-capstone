@@ -64,12 +64,32 @@ flowchart TB
         QT --> MV4
     end
 
+    subgraph DASH["Analytics Dashboard"]
+        D1["Fleet Overview<br/>satellite × station heatmap"]
+        D2["Battery Health<br/>rolling voltage + CRITICAL flag"]
+        D3["Comms Quality<br/>signal strength ranking"]
+        D4["Data Quality<br/>quarantine error breakdown"]
+    end
+
+    MV1 --> D1
+    MV2 --> D2
+    MV3 --> D3
+    MV4 --> D4
+
+    subgraph SCHED["Continuous Schedule"]
+        JOB["Pipeline Schedule Job<br/>───────────────<br/>continuous / UNPAUSED<br/>performance optimized<br/>failure → email alert"]
+    end
+
+    JOB -->|triggers| PIPELINE
+
     style SIM fill:#1a1a2e,stroke:#e94560,color:#fff
     style VOL fill:#16213e,stroke:#0f3460,color:#fff
     style BRONZE fill:#0f3460,stroke:#533483,color:#fff
     style SILVER fill:#533483,stroke:#e94560,color:#fff
     style GOLD fill:#e94560,stroke:#fff,color:#fff
     style QT fill:#ff6b6b,stroke:#c0392b,color:#fff
+    style DASH fill:#0a3d62,stroke:#00d4ff,color:#fff
+    style SCHED fill:#1a1a2e,stroke:#00d4ff,color:#fff
 ```
 
 ## Data Flow Detail
@@ -139,3 +159,48 @@ Batch 1    Batch 2    Batch 3    Batch 4    Batch 5    Batch 6
 Dropout windows create gaps in the Gold time-series aggregations. The
 `voltage_degradation_monitor` rolling window naturally shrinks during
 dropout periods and recovers when the satellite resumes reporting.
+
+## Operational Architecture
+
+### Decoupled Execution Model
+
+The simulator and pipeline are **intentionally decoupled**:
+
+```
+┌─────────────────────┐    ┌────────────────────────────┐
+│  Telemetry Simulator │    │  Pipeline Schedule Job      │
+│  (serverless)        │    │  (continuous / UNPAUSED)     │
+│                      │    │                              │
+│  Writes JSON-lines   │    │  Triggers pipeline updates   │
+│  to UC Volume        │    │  performance optimized       │
+│                      │    │  failure → richard.ogoma@    │
+│  Independent run     │    │           outlook.com        │
+└──────────┬──────────┘    └──────────────┬───────────────┘
+           │                              │
+           ▼                              ▼
+    ┌──────────────┐            ┌─────────────────────┐
+    │  UC Volume   │◄───────────│  Auto Loader (Bronze)│
+    │  raw JSON    │  picks up  │  streaming ingestion  │
+    └──────────────┘  files     └───────────────────────┘
+```
+
+Benefits:
+- Run simulator alone to pre-stage data for demos
+- Run pipeline alone to reprocess existing Volume files
+- Run both simultaneously for live streaming walkthrough
+- Schedule independently (simulator on-demand, pipeline continuous)
+
+### Analytics Dashboard
+
+The **OrbitalSense Telemetry Analytics** dashboard (4 pages, 17 widgets)
+provides real-time visibility over the Gold layer:
+
+| Page | Source Table | Widgets |
+|---|---|---|
+| Fleet Overview | `telemetry_volume_by_station` | Heatmap, 3 counters |
+| Battery Health | `voltage_degradation_monitor` | Line chart, 3 filtered counters, CRITICAL table |
+| Comms Quality | `signal_strength_report` | Bar chart, detail table |
+| Data Quality | `subsystem_alert_correlation` | Stacked bar, 3 counters, breakdown table |
+
+Theme: custom dark (Orbitron / Space Grotesk) with semantic color mappings
+(NOMINAL=green, WARNING=amber, CRITICAL=red).

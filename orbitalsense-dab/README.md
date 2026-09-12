@@ -22,6 +22,8 @@ UC Volume (raw JSON) ─► Bronze (Auto Loader) ─► Silver (Curated + Quaran
 - **Stateful deduplication** using SHA-256 payload hashing with watermarks
 - **Fault-tolerant simulation** with configurable chaos injection
 - **Unity Catalog governance** with parameterized catalog/schema per environment
+- **Continuous pipeline schedule** with performance optimization and failure email alerts
+- **Analytics dashboard** (4 pages, 17 widgets) with custom dark theme for real-time fleet monitoring
 
 ## Dataset Schemas
 
@@ -82,12 +84,16 @@ git clone <repo-url> && cd orbitalsense-dab
 # Deploy the bundle (dev target)
 databricks bundle deploy --target dev
 
-# Run the telemetry simulator
+# Run the telemetry simulator (serverless)
 databricks bundle run telemetry_simulator --target dev
 
-# Start the streaming pipeline
+# The pipeline runs continuously via its backing schedule job.
+# To trigger manually instead:
 databricks bundle run orbital_sense_pipeline --target dev
 ```
+
+The simulator and pipeline are **decoupled by design** — run them
+independently or simultaneously. Auto Loader picks up files as they land.
 
 ### Teardown
 
@@ -106,20 +112,24 @@ orbitalsense-dab/
 │   ├── deployment_guide.md                 # Step-by-step deployment
 │   └── design_rationale.md                 # Technical design decisions
 ├── resources/
-│   ├── raw_telemetry_vol.volume.yml        # UC Volume definition
-│   ├── telemetry_simulator.job.yml         # Simulator job definition
-│   └── orbital_sense_pipeline.pipeline.yml # SDP pipeline definition
+│   ├── raw_telemetry_vol.volume.yml              # UC Volume definition
+│   ├── telemetry_simulator.job.yml               # Simulator job (serverless)
+│   ├── orbital_sense_pipeline.pipeline.yml       # SDP pipeline definition
+│   ├── orbital_sense_pipeline_schedule.job.yml   # Continuous pipeline schedule
+│   └── orbital_sense_dashboard.dashboard.yml     # Analytics dashboard
 ├── utilities/
-│   └── simulator.py                        # Telemetry data generator
+│   └── simulator.py                              # Telemetry data generator
 └── src/
+    ├── dashboards/
+    │   └── orbital_sense_analytics.lvdash.json    # Dashboard config (4 pages)
     └── orbital_sense_pipeline/
         └── transformations/
             ├── 01-bronze/
-            │   └── bronze_ingestion.py      # Auto Loader ingestion
+            │   └── bronze_ingestion.py            # Auto Loader ingestion
             ├── 02-silver/
             │   └── silver_curated_and_quarantine.py
             └── 03-gold/
-                └── gold_analytics.py        # Business analytics views
+                └── gold_analytics.py              # Business analytics views
 ```
 
 ## Documentation

@@ -51,10 +51,13 @@ variables:
     default: "orbitalsense"
   schema:
     default: "telemetry"
+  warehouse_id:
+    default: "1cf90f29dc0ea17d"  # quick-demos warehouse
 ```
 
-The `dev` target overrides `catalog` to `dev_orbitalsense`. To use a
-different catalog, update the target-level variables.
+The `dev` target overrides `catalog` to `dev_orbitalsense`. The
+`warehouse_id` is used by the analytics dashboard. To use a different
+SQL warehouse, update this value with your warehouse ID.
 
 ### 2.3 Validate the Bundle
 
@@ -72,8 +75,10 @@ databricks bundle deploy --target dev
 
 This creates:
 - Unity Catalog Volume: `dev_orbitalsense.telemetry.raw_telemetry_vol`
-- Databricks Job: `[dev <user>] OrbitalSense Telemetry Simulator`
+- Databricks Job: `[dev <user>] OrbitalSense Telemetry Simulator` (serverless)
+- Databricks Job: `[dev <user>] OrbitalSense Pipeline Schedule` (continuous)
 - Lakeflow Pipeline: `[dev <user>] OrbitalSense Streaming Pipeline`
+- AI/BI Dashboard: `[dev <user>] OrbitalSense Telemetry Analytics`
 
 ### 2.5 Verify Deployment
 
@@ -100,21 +105,29 @@ databricks bundle run telemetry_simulator --target dev \
   -- --num-batches 10 --batch-interval 2
 ```
 
-### 3.2 Start the Streaming Pipeline
+### 3.2 Streaming Pipeline
+
+The pipeline runs **continuously** via its backing schedule job
+(`OrbitalSense Pipeline Schedule`), which is deployed in UNPAUSED state.
+It will automatically trigger pipeline updates as new data lands.
+
+To trigger a manual one-off update instead:
 
 ```bash
 databricks bundle run orbital_sense_pipeline --target dev
 ```
 
-The pipeline processes files as they land in the Volume. You can start
-the pipeline before, during, or after the simulator — Auto Loader will
-pick up all files from the checkpoint.
+The simulator and pipeline are **decoupled** — run them independently
+or simultaneously. Auto Loader picks up files from the Volume checkpoint.
 
 ### 3.3 Monitor
 
-- **Job runs**: Workspace > Lakeflow Jobs > OrbitalSense Telemetry Simulator
+- **Simulator job**: Workspace > Lakeflow Jobs > OrbitalSense Telemetry Simulator
+- **Pipeline schedule**: Workspace > Lakeflow Jobs > OrbitalSense Pipeline Schedule
 - **Pipeline**: Workspace > Lakeflow Pipelines > OrbitalSense Streaming Pipeline
+- **Dashboard**: Workspace > SQL > Dashboards > OrbitalSense Telemetry Analytics
 - **Tables**: Unity Catalog > dev_orbitalsense.telemetry (all tables)
+- **Failure alerts**: Email notifications to richard.ogoma@outlook.com on pipeline failures
 
 ## 4. Production Deployment
 
@@ -161,4 +174,4 @@ and catalogs through standard Unity Catalog DDL.
 | Pipeline stuck in STARTING | Serverless compute provisioning | Wait 2-3 min; check workspace quota |
 | No data in Gold tables | Pipeline not triggered | Run `bundle run orbital_sense_pipeline` |
 | Duplicate records in curated | Watermark expired | Expected for records > 10 min late |
-| Job cluster fails to start | Node type unavailable | Change `Standard_DS3_v2` in job YAML |
+| Dashboard shows no data | Gold tables empty | Run simulator first, then check pipeline |
