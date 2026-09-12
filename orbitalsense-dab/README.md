@@ -141,4 +141,4 @@ orbitalsense-dab/
 
 ## License
 
-Internal use — NLNG Data Engineering Team.
+MIT License — see [LICENSE](LICENSE) for details.

@@ -32,12 +32,12 @@ targets:
     mode: production
     workspace:
       host: https://adb-7990025474660843.3.azuredatabricks.net
-      # We always use /Users/richard.ogoma-a@nlng.onmicrosoft.com for all resources to make sure we only have a single copy.
-      root_path: /Users/richard.ogoma-a@nlng.onmicrosoft.com/.bundle/${bundle.name}/${bundle.target}
+      # Pin the root path per deployer to ensure a single copy of resources.
+      root_path: /Users/${workspace.current_user.userName}/.bundle/${bundle.name}/${bundle.target}
     run_as:
-      # This runs as richard.ogoma-a@nlng.onmicrosoft.com in production. We could also use a service principal here,
+      # This runs as the deploying user in production. Use a service principal for CI/CD,
       # see https://docs.databricks.com/dev-tools/bundles/permissions.html.
-      user_name: richard.ogoma-a@nlng.onmicrosoft.com
+      user_name: ${workspace.current_user.userName}
     variables:
       catalog: "orbitalsense"
       schema: "telemetry"

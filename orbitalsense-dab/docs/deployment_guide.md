@@ -139,7 +139,7 @@ databricks bundle run orbital_sense_pipeline --target prod
 ```
 
 Production uses `orbitalsense.telemetry` catalog/schema and runs as
-`richard.ogoma-a@nlng.onmicrosoft.com`.
+the deploying user.
 
 ## 5. Selective Re-deployment
 
