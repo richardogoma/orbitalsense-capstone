@@ -3,9 +3,9 @@ resources:
     telemetry_simulator:
       name: "OrbitalSense Telemetry Simulator"
       description: >
-        End-to-end orchestration: generates synthetic satellite telemetry
-        with fault injection, then triggers the streaming pipeline to
-        process the data through Bronze > Silver > Gold.
+        Generates synthetic satellite telemetry JSON payloads with fault
+        injection (duplicates, missing fields, OOB voltage, dropout) and
+        writes them to the raw_telemetry_vol UC Volume.
       tasks:
         - task_key: "generate_telemetry"
           description: "Generate telemetry JSON payloads into the UC Volume"
@@ -21,12 +21,6 @@ resources:
               - "--num-batches"
               - "100"
           environment_key: Default
-        - task_key: "run_pipeline"
-          description: "Trigger the streaming pipeline to process new telemetry"
-          depends_on:
-            - task_key: "generate_telemetry"
-          pipeline_task:
-            pipeline_id: ${resources.pipelines.orbital_sense_pipeline.id}
       queue:
         enabled: true
       environments:
