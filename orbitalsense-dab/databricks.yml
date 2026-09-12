@@ -12,6 +12,9 @@ variables:
   schema:
     description: "Unity Catalog schema for OrbitalSense"
     default: "telemetry"
+  warehouse_id:
+    description: "SQL Warehouse ID for the OrbitalSense dashboard"
+    default: "1cf90f29dc0ea17d"
 
 targets:
   # The 'dev' target, for development purposes. This target is the default.

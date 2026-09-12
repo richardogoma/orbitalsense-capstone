@@ -1,0 +1,1230 @@
+{
+  "datasets": [
+    {
+      "name": "telemetry_volume",
+      "displayName": "Telemetry Volume by Station",
+      "queryLines": [
+        "SELECT\n",
+        "  *\n",
+        "FROM\n",
+        "  telemetry_volume_by_station"
+      ],
+      "catalog": "dev_orbitalsense",
+      "schema": "telemetry"
+    },
+    {
+      "name": "signal_strength",
+      "displayName": "Signal Strength Report",
+      "queryLines": [
+        "SELECT\n",
+        "  *\n",
+        "FROM\n",
+        "  signal_strength_report"
+      ],
+      "catalog": "dev_orbitalsense",
+      "schema": "telemetry"
+    },
+    {
+      "name": "voltage_degradation",
+      "displayName": "Voltage Degradation Monitor",
+      "queryLines": [
+        "SELECT\n",
+        "  *\n",
+        "FROM\n",
+        "  voltage_degradation_monitor"
+      ],
+      "catalog": "dev_orbitalsense",
+      "schema": "telemetry"
+    },
+    {
+      "name": "subsystem_alerts",
+      "displayName": "Subsystem Alert Correlation",
+      "queryLines": [
+        "SELECT\n",
+        "  *\n",
+        "FROM\n",
+        "  subsystem_alert_correlation"
+      ],
+      "catalog": "dev_orbitalsense",
+      "schema": "telemetry"
+    }
+  ],
+  "pages": [
+    {
+      "name": "aaf4b8a8",
+      "displayName": "Fleet Overview",
+      "layout": [
+        {
+          "widget": {
+            "name": "fleet_header",
+            "multilineTextboxSpec": {
+              "lines": [
+                "## Fleet Overview\n",
+                "Telemetry volume by satellite and ground station coverage"
+              ]
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 0,
+            "width": 12,
+            "height": 1
+          }
+        },
+        {
+          "widget": {
+            "name": "total_records",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "telemetry_volume",
+                  "fields": [
+                    {
+                      "name": "sum(record_count)",
+                      "expression": "SUM(`record_count`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "Total Records"
+              },
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "sum(record_count)",
+                  "rowNumber": 0
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 1,
+            "width": 4,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "distinct_sats",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "telemetry_volume",
+                  "fields": [
+                    {
+                      "name": "countdistinct(satellite_id)",
+                      "expression": "COUNT(DISTINCT `satellite_id`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "Active Satellites"
+              },
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "countdistinct(satellite_id)",
+                  "rowNumber": 0
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 4,
+            "y": 1,
+            "width": 4,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "distinct_gs",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "telemetry_volume",
+                  "fields": [
+                    {
+                      "name": "countdistinct(ground_station_id)",
+                      "expression": "COUNT(DISTINCT `ground_station_id`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "Ground Stations"
+              },
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "countdistinct(ground_station_id)",
+                  "rowNumber": 0
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 8,
+            "y": 1,
+            "width": 4,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "volume_pivot",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "telemetry_volume",
+                  "fields": [
+                    {
+                      "name": "satellite_id",
+                      "expression": "`satellite_id`"
+                    },
+                    {
+                      "name": "ground_station_id",
+                      "expression": "`ground_station_id`"
+                    },
+                    {
+                      "name": "sum(record_count)",
+                      "expression": "SUM(`record_count`)"
+                    }
+                  ],
+                  "cubeGroupingSets": {
+                    "sets": [
+                      {
+                        "fieldNames": [
+                          "satellite_id"
+                        ]
+                      },
+                      {
+                        "fieldNames": [
+                          "ground_station_id"
+                        ]
+                      }
+                    ]
+                  },
+                  "disaggregated": false,
+                  "orders": [
+                    {
+                      "direction": "ASC",
+                      "expression": "`satellite_id`"
+                    },
+                    {
+                      "direction": "ASC",
+                      "expression": "`ground_station_id`"
+                    }
+                  ]
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "Telemetry Volume: Satellite x Ground Station"
+              },
+              "version": 3,
+              "widgetType": "pivot",
+              "encodings": {
+                "rows": [
+                  {
+                    "fieldName": "satellite_id"
+                  }
+                ],
+                "columns": [
+                  {
+                    "fieldName": "ground_station_id"
+                  }
+                ],
+                "cell": {
+                  "type": "single-cell",
+                  "fieldName": "sum(record_count)",
+                  "cellType": "text"
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 3,
+            "width": 12,
+            "height": 8
+          }
+        }
+      ],
+      "pageType": "PAGE_TYPE_CANVAS",
+      "layoutVersion": "GRID_V1"
+    },
+    {
+      "name": "battery_health",
+      "displayName": "Battery Health",
+      "layout": [
+        {
+          "widget": {
+            "name": "batt_header",
+            "multilineTextboxSpec": {
+              "lines": [
+                "## Battery Health Monitor\n",
+                "Rolling average voltage and degradation alerts by satellite"
+              ]
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 0,
+            "width": 12,
+            "height": 1
+          }
+        },
+        {
+          "widget": {
+            "name": "voltage_line",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "voltage_degradation",
+                  "fields": [
+                    {
+                      "name": "satellite_id",
+                      "expression": "`satellite_id`"
+                    },
+                    {
+                      "name": "event_ts",
+                      "expression": "`event_ts`"
+                    },
+                    {
+                      "name": "avg(rolling_avg_voltage)",
+                      "expression": "AVG(`rolling_avg_voltage`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "Voltage Trend by Satellite",
+                  "fields": []
+                }
+              },
+              "version": 3,
+              "widgetType": "line",
+              "encodings": {
+                "x": {
+                  "fieldName": "event_ts",
+                  "displayName": "event_ts",
+                  "scale": {
+                    "type": "temporal"
+                  }
+                },
+                "y": {
+                  "fieldName": "avg(rolling_avg_voltage)",
+                  "displayName": "rolling_avg_voltage",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "color": {
+                  "fieldName": "satellite_id",
+                  "displayName": "satellite_id",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 3,
+            "width": 12,
+            "height": 7
+          }
+        },
+        {
+          "widget": {
+            "name": "critical_table",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "voltage_degradation",
+                  "fields": [
+                    {
+                      "name": "satellite_id",
+                      "expression": "`satellite_id`"
+                    },
+                    {
+                      "name": "event_ts",
+                      "expression": "`event_ts`"
+                    },
+                    {
+                      "name": "battery_voltage",
+                      "expression": "`battery_voltage`"
+                    },
+                    {
+                      "name": "rolling_avg_voltage",
+                      "expression": "`rolling_avg_voltage`"
+                    },
+                    {
+                      "name": "health_status",
+                      "expression": "`health_status`"
+                    },
+                    {
+                      "name": "ground_station_id",
+                      "expression": "`ground_station_id`"
+                    }
+                  ],
+                  "filters": [
+                    {
+                      "expression": "`health_status` IN ('CRITICAL')"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "CRITICAL Satellites",
+                  "fields": []
+                }
+              },
+              "version": 2,
+              "widgetType": "table",
+              "encodings": {
+                "columns": [
+                  {
+                    "fieldName": "satellite_id"
+                  },
+                  {
+                    "fieldName": "event_ts"
+                  },
+                  {
+                    "fieldName": "battery_voltage"
+                  },
+                  {
+                    "fieldName": "rolling_avg_voltage"
+                  },
+                  {
+                    "fieldName": "health_status"
+                  },
+                  {
+                    "fieldName": "ground_station_id"
+                  }
+                ]
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 10,
+            "width": 12,
+            "height": 5
+          }
+        },
+        {
+          "widget": {
+            "name": "nominal_count",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "voltage_degradation",
+                  "fields": [
+                    {
+                      "name": "countdistinct(satellite_id)",
+                      "expression": "COUNT(DISTINCT `satellite_id`)"
+                    }
+                  ],
+                  "filters": [
+                    {
+                      "expression": "`health_status` IN ('NOMINAL')"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "Nominal Satellites"
+              },
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "countdistinct(satellite_id)",
+                  "rowNumber": 0
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 1,
+            "width": 4,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "warning_count",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "voltage_degradation",
+                  "fields": [
+                    {
+                      "name": "countdistinct(satellite_id)",
+                      "expression": "COUNT(DISTINCT `satellite_id`)"
+                    }
+                  ],
+                  "filters": [
+                    {
+                      "expression": "`health_status` IN ('WARNING')"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "Warning Satellites"
+              },
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "countdistinct(satellite_id)",
+                  "rowNumber": 0
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 4,
+            "y": 1,
+            "width": 4,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "critical_count",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "voltage_degradation",
+                  "fields": [
+                    {
+                      "name": "countdistinct(satellite_id)",
+                      "expression": "COUNT(DISTINCT `satellite_id`)"
+                    }
+                  ],
+                  "filters": [
+                    {
+                      "expression": "`health_status` IN ('CRITICAL')"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "Critical Satellites"
+              },
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "countdistinct(satellite_id)",
+                  "rowNumber": 0
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 8,
+            "y": 1,
+            "width": 4,
+            "height": 2
+          }
+        }
+      ],
+      "pageType": "PAGE_TYPE_CANVAS",
+      "layoutVersion": "GRID_V1"
+    },
+    {
+      "name": "comms_quality",
+      "displayName": "Comms Quality",
+      "layout": [
+        {
+          "widget": {
+            "name": "comms_header",
+            "multilineTextboxSpec": {
+              "lines": [
+                "## Communications Quality\n",
+                "Signal strength analysis across the satellite fleet"
+              ]
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 0,
+            "width": 12,
+            "height": 1
+          }
+        },
+        {
+          "widget": {
+            "name": "signal_bar",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "signal_strength",
+                  "fields": [
+                    {
+                      "name": "signal_quality",
+                      "expression": "`signal_quality`"
+                    },
+                    {
+                      "name": "satellite_id",
+                      "expression": "`satellite_id`"
+                    },
+                    {
+                      "name": "avg(avg_signal_dbm)",
+                      "expression": "AVG(`avg_signal_dbm`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "Signal Strength by Satellite",
+                  "fields": []
+                }
+              },
+              "version": 3,
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "satellite_id",
+                  "displayName": "satellite_id",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "y": {
+                  "fieldName": "avg(avg_signal_dbm)",
+                  "displayName": "avg_signal_dbm",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "color": {
+                  "fieldName": "signal_quality",
+                  "displayName": "signal_quality",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 1,
+            "width": 12,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "signal_table",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "signal_strength",
+                  "fields": [
+                    {
+                      "name": "satellite_id",
+                      "expression": "`satellite_id`"
+                    },
+                    {
+                      "name": "min_signal_dbm",
+                      "expression": "`min_signal_dbm`"
+                    },
+                    {
+                      "name": "avg_signal_dbm",
+                      "expression": "`avg_signal_dbm`"
+                    },
+                    {
+                      "name": "max_signal_dbm",
+                      "expression": "`max_signal_dbm`"
+                    },
+                    {
+                      "name": "signal_stddev",
+                      "expression": "`signal_stddev`"
+                    },
+                    {
+                      "name": "reading_count",
+                      "expression": "`reading_count`"
+                    },
+                    {
+                      "name": "window_start",
+                      "expression": "`window_start`"
+                    },
+                    {
+                      "name": "window_end",
+                      "expression": "`window_end`"
+                    },
+                    {
+                      "name": "signal_quality",
+                      "expression": "`signal_quality`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "Signal Strength Detail"
+              },
+              "version": 2,
+              "widgetType": "table",
+              "encodings": {
+                "columns": [
+                  {
+                    "fieldName": "satellite_id"
+                  },
+                  {
+                    "fieldName": "min_signal_dbm"
+                  },
+                  {
+                    "fieldName": "avg_signal_dbm"
+                  },
+                  {
+                    "fieldName": "max_signal_dbm"
+                  },
+                  {
+                    "fieldName": "signal_stddev"
+                  },
+                  {
+                    "fieldName": "reading_count"
+                  },
+                  {
+                    "fieldName": "window_start"
+                  },
+                  {
+                    "fieldName": "window_end"
+                  },
+                  {
+                    "fieldName": "signal_quality"
+                  }
+                ]
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 7,
+            "width": 12,
+            "height": 7
+          }
+        }
+      ],
+      "pageType": "PAGE_TYPE_CANVAS",
+      "layoutVersion": "GRID_V1"
+    },
+    {
+      "name": "data_quality",
+      "displayName": "Data Quality",
+      "layout": [
+        {
+          "widget": {
+            "name": "dq_header",
+            "multilineTextboxSpec": {
+              "lines": [
+                "## Data Quality & Quarantine\n",
+                "Subsystem alert frequency and error code analysis"
+              ]
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 0,
+            "width": 12,
+            "height": 1
+          }
+        },
+        {
+          "widget": {
+            "name": "total_quarantine",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "subsystem_alerts",
+                  "fields": [
+                    {
+                      "name": "sum(alert_count)",
+                      "expression": "SUM(`alert_count`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "Total Quarantine Records"
+              },
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "sum(alert_count)",
+                  "rowNumber": 0
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 1,
+            "width": 4,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "affected_subsystems",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "subsystem_alerts",
+                  "fields": [
+                    {
+                      "name": "countdistinct(subsystem)",
+                      "expression": "COUNT(DISTINCT `subsystem`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "Affected Subsystems"
+              },
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "countdistinct(subsystem)",
+                  "rowNumber": 0
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 4,
+            "y": 1,
+            "width": 4,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "error_types",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "subsystem_alerts",
+                  "fields": [
+                    {
+                      "name": "countdistinct(error_code)",
+                      "expression": "COUNT(DISTINCT `error_code`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "Error Code Types"
+              },
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "countdistinct(error_code)",
+                  "rowNumber": 0
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 8,
+            "y": 1,
+            "width": 4,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "alert_bar",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "subsystem_alerts",
+                  "fields": [
+                    {
+                      "name": "error_code",
+                      "expression": "`error_code`"
+                    },
+                    {
+                      "name": "subsystem",
+                      "expression": "`subsystem`"
+                    },
+                    {
+                      "name": "sum(alert_count)",
+                      "expression": "SUM(`alert_count`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "Alerts by Subsystem",
+                  "fields": []
+                }
+              },
+              "version": 3,
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "subsystem",
+                  "displayName": "subsystem",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "y": {
+                  "fieldName": "sum(alert_count)",
+                  "displayName": "alert_count",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "color": {
+                  "fieldName": "error_code",
+                  "displayName": "error_code",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 3,
+            "width": 12,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "alert_table",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "subsystem_alerts",
+                  "fields": [
+                    {
+                      "name": "subsystem",
+                      "expression": "`subsystem`"
+                    },
+                    {
+                      "name": "error_code",
+                      "expression": "`error_code`"
+                    },
+                    {
+                      "name": "alert_count",
+                      "expression": "`alert_count`"
+                    },
+                    {
+                      "name": "affected_satellites",
+                      "expression": "`affected_satellites`"
+                    },
+                    {
+                      "name": "first_alert",
+                      "expression": "`first_alert`"
+                    },
+                    {
+                      "name": "last_alert",
+                      "expression": "`last_alert`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "Quarantine Breakdown"
+              },
+              "version": 2,
+              "widgetType": "table",
+              "encodings": {
+                "columns": [
+                  {
+                    "fieldName": "subsystem"
+                  },
+                  {
+                    "fieldName": "error_code"
+                  },
+                  {
+                    "fieldName": "alert_count"
+                  },
+                  {
+                    "fieldName": "affected_satellites"
+                  },
+                  {
+                    "fieldName": "first_alert"
+                  },
+                  {
+                    "fieldName": "last_alert"
+                  }
+                ]
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 9,
+            "width": 12,
+            "height": 5
+          }
+        }
+      ],
+      "pageType": "PAGE_TYPE_CANVAS",
+      "layoutVersion": "GRID_V1"
+    }
+  ],
+  "uiSettings": {
+    "theme": {
+      "canvasBackgroundColor": {
+        "dark": "#0B0E14"
+      },
+      "widgetBackgroundColor": {
+        "dark": "#131720"
+      },
+      "widgetBorderColor": {
+        "dark": "#1E2533"
+      },
+      "selectionColor": {
+        "dark": "#00D4FF"
+      },
+      "visualizationColors": [
+        "#00D4FF",
+        "#FF6B6B",
+        "#4ECB71",
+        "#FFB74D",
+        "#AB7CFF",
+        "#FF4DA6",
+        "#00E5A0",
+        "#5C9AFF",
+        "#FF8C42",
+        "#C4E538"
+      ],
+      "widgetHeaderAlignment": "ALIGNMENT_UNSPECIFIED",
+      "widgetPadding": 12,
+      "widgetMargin": 8,
+      "widgetCornerRadius": 8,
+      "widgetShadow": 0,
+      "continuousGradient": {
+        "darkMode": {
+          "customSequential": {
+            "start": "#0B0E14",
+            "end": "#00D4FF"
+          }
+        }
+      },
+      "fontSettings": {
+        "base": {
+          "fontFamily": "Space Grotesk",
+          "fontColor": {
+            "dark": "#C8D1DB"
+          }
+        },
+        "widgetTitle": {
+          "fontFamily": "Orbitron",
+          "fontColor": {
+            "dark": "#E8EDF3"
+          },
+          "fontSize": 14,
+          "fontWeight": 600
+        },
+        "widgetDescription": {
+          "fontColor": {
+            "dark": "#8B95A5"
+          }
+        },
+        "fieldTitle": {
+          "fontColor": {
+            "dark": "#8B95A5"
+          }
+        },
+        "fieldValue": {
+          "fontColor": {
+            "dark": "#C8D1DB"
+          }
+        }
+      },
+      "gridLineColor": {
+        "dark": "#1E2533"
+      },
+      "axisLineColor": {
+        "dark": "#2A3345"
+      },
+      "visualizationColorMappings": [
+        {
+          "value": "NOMINAL",
+          "color": "#4ECB71"
+        },
+        {
+          "value": "WARNING",
+          "color": "#FFB74D"
+        },
+        {
+          "value": "CRITICAL",
+          "color": "#FF6B6B"
+        },
+        {
+          "value": "POOR",
+          "color": "#FF6B6B"
+        },
+        {
+          "value": "FAIR",
+          "color": "#FFB74D"
+        },
+        {
+          "value": "GOOD",
+          "color": "#4ECB71"
+        },
+        {
+          "value": "EXCELLENT",
+          "color": "#00D4FF"
+        }
+      ]
+    },
+    "applyModeEnabled": false
+  }
+}
