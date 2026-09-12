@@ -1,0 +1,24 @@
+resources:
+  jobs:
+    orbital_sense_pipeline_schedule:
+      name: "OrbitalSense Pipeline Schedule"
+      description: >
+        Continuous backing schedule for the OrbitalSense Streaming Pipeline.
+        Keeps the pipeline running indefinitely, processing telemetry files
+        as they land in the UC Volume via Auto Loader.
+      tasks:
+        - task_key: "pipeline-task"
+          pipeline_task:
+            pipeline_id: ${resources.pipelines.orbital_sense_pipeline.id}
+      continuous:
+        pause_status: UNPAUSED
+      performance_target: PERFORMANCE_OPTIMIZED
+      notification_settings:
+        no_alert_for_skipped_runs: true
+        no_alert_for_canceled_runs: false
+      email_notifications:
+        on_failure:
+          - "richard.ogoma@outlook.com"
+      permissions:
+        - level: CAN_VIEW
+          group_name: "users"

@@ -3,7 +3,7 @@ resources:
     orbital_sense_pipeline:
       name: "OrbitalSense Streaming Pipeline"
       catalog: ${var.catalog}
-      target: ${var.schema}
+      schema: ${var.schema}
 
       libraries:
         - glob:
@@ -12,7 +12,6 @@ resources:
       root_path: ../src/orbital_sense_pipeline
 
       serverless: true
-      continuous: false
       development: true
       photon: true
       channel: current
